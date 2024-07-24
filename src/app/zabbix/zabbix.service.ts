@@ -166,8 +166,12 @@ export class ZabbixService {
           console.error(err);
           return;
         }
-        console.log(stdout);
-        console.log(stderr);
+        console.log(
+          `${stdout} -
+            zabbix_sender -z 192.168.1.23 -s "ASTERISK" -k ramal.${item} -o "Problema"`,
+        );
+        console.log(`${stderr} -
+            zabbix_sender -z 192.168.1.23 -s "ASTERISK" -k ramal.${item} -o "Problema"`);
       },
     );
   }
@@ -180,8 +184,12 @@ export class ZabbixService {
           console.error(err);
           return;
         }
-        console.log(stdout);
-        console.log(stderr);
+        console.log(
+          `${stdout} zabbix_sender -z 192.168.1.23 -s "ASTERISK" -k ramal.${item} -o "OK"`,
+        );
+        console.log(
+          `${stderr} zabbix_sender -z 192.168.1.23 -s "ASTERISK" -k ramal.${item} -o "OK"`,
+        );
       },
     );
   }
