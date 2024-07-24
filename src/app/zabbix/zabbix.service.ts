@@ -158,9 +158,23 @@ export class ZabbixService {
     return response.data;
   }
 
-  async sendAlert(item: string) {
+  async sendAlertError(item: string) {
     exec(
       `zabbix_sender -z 192.168.1.23 -s "ASTERISK" -k ramal.${item} -o "Problema"`,
+      (err, stdout, stderr) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        console.log(stdout);
+        console.log(stderr);
+      },
+    );
+  }
+
+  async sendAlertSucesso(item: string) {
+    exec(
+      `zabbix_sender -z 192.168.1.23 -s "ASTERISK" -k ramal.${item} -o "OK"`,
       (err, stdout, stderr) => {
         if (err) {
           console.error(err);

@@ -19,7 +19,7 @@ export class AsteriskService {
     });
 
     return response.data.filter((data) => {
-      return data.state !== 'online' && data.technology === 'SIP';
+      return data.technology === 'SIP';
     });
   }
 }

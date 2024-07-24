@@ -4,7 +4,7 @@ import { AsteriskService } from 'src/app/asterisk/asterisk.service';
 import { ZabbixService } from 'src/app/zabbix/zabbix.service';
 
 @Injectable()
-export class RamaisService {
+export class VerifyRamaisService {
   constructor(
     private readonly zabbixService: ZabbixService,
     private readonly asteriskService: AsteriskService,
@@ -23,15 +23,23 @@ export class RamaisService {
         );
 
         if (validTrigger.result.length > 0) {
-          await this.zabbixService.sendAlert(status.resource);
+          if (status.state === 'online') {
+            await this.zabbixService.sendAlertSucesso(status.resource);
+          } else {
+            await this.zabbixService.sendAlertError(status.resource);
+          }
         } else {
-          await this.zabbixService.createTrigger(status.resource);
-          await this.zabbixService.sendAlert(status.resource);
+          if (status.state !== 'online') {
+            await this.zabbixService.createTrigger(status.resource);
+            await this.zabbixService.sendAlertError(status.resource);
+          }
         }
       } else {
-        await this.zabbixService.createItem(status.resource);
-        await this.zabbixService.createTrigger(status.resource);
-        await this.zabbixService.sendAlert(status.resource);
+        if (status.state !== 'online') {
+          await this.zabbixService.createItem(status.resource);
+          await this.zabbixService.createTrigger(status.resource);
+          await this.zabbixService.sendAlertError(status.resource);
+        }
       }
     });
   }
