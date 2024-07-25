@@ -10,7 +10,7 @@ export class VerifyRamaisService {
     private readonly asteriskService: AsteriskService,
   ) {}
 
-  @Cron('* * * * *')
+  @Cron('*/3 * * * *')
   async verifyAllRamaisOff() {
     const allRamais = await this.asteriskService.getAsteriskStatus();
 
