@@ -99,10 +99,6 @@ export class ZabbixService {
       },
     });
 
-    console.log(
-      `${JSON.stringify(response.data)} - ${item} - ${JSON.stringify(itemId)}`,
-    );
-
     return response.data;
   }
 
