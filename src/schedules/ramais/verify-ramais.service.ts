@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { AsteriskService } from 'src/app/asterisk/asterisk.service';
-import { ZabbixService } from 'src/app/zabbix/zabbix.service';
+import { AsteriskService } from '../../app/asterisk/asterisk.service';
+import { ZabbixService } from '../../app/zabbix/zabbix.service';
 
 @Injectable()
 export class VerifyRamaisService {
@@ -14,7 +14,7 @@ export class VerifyRamaisService {
   async verifyAllRamaisOff() {
     const allRamais = await this.asteriskService.getAsteriskStatus();
 
-    allRamais.forEach(async (status) => {
+    for (const status of allRamais) {
       const existItem = await this.zabbixService.verifyItem(status.resource);
 
       if (existItem.result.length > 0) {
@@ -41,6 +41,6 @@ export class VerifyRamaisService {
           await this.zabbixService.sendAlertError(status.resource);
         }
       }
-    });
+    }
   }
 }

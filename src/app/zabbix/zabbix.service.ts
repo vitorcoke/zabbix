@@ -75,14 +75,14 @@ export class ZabbixService {
       },
     });
 
-    return response.data[0].itemid;
+    return response.data.result[0].itemid;
   }
 
   async verifyTriggerToItem(item: string) {
     const url = `${this.host}/${this.endpoint}`;
     const auth = await this.auth();
 
-    const itemId = await this.verifyItem(item);
+    const itemId = await this.getItem(item);
     const data = {
       jsonrpc: '2.0',
       method: 'trigger.get',
@@ -98,6 +98,10 @@ export class ZabbixService {
         'Content-Type': 'application/json',
       },
     });
+
+    console.log(
+      `${JSON.stringify(response.data)} - ${item} - ${JSON.stringify(itemId)}`,
+    );
 
     return response.data;
   }
