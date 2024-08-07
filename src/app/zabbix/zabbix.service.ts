@@ -4,8 +4,8 @@ import { exec } from 'child_process';
 
 @Injectable()
 export class ZabbixService {
-  private host = 'http://192.168.1.23';
-  private endpoint = 'zabbix/api_jsonrpc.php';
+  private host = 'http://192.168.1.10';
+  private endpoint = 'api_jsonrpc.php';
 
   async auth() {
     const url = `${this.host}/${this.endpoint}`;
@@ -13,7 +13,7 @@ export class ZabbixService {
       jsonrpc: '2.0',
       method: 'user.login',
       params: {
-        user: 'vitorcoke',
+        username: 'vitorcoke',
         password: '123@mudar',
       },
       id: 1,
@@ -137,7 +137,7 @@ export class ZabbixService {
       params: {
         name: `Ramal ${item}`,
         key_: `ramal.${item}`,
-        hostid: '17231',
+        hostid: '16192',
         type: 2,
         value_type: 4,
         interfaceid: '0',
@@ -160,7 +160,7 @@ export class ZabbixService {
 
   async sendAlertError(item: string) {
     exec(
-      `zabbix_sender -z 192.168.1.23 -s "ASTERISK" -k ramal.${item} -o "Problema"`,
+      `zabbix_sender -z 192.168.1.10 -s "ASTERISK" -k ramal.${item} -o "Problema"`,
       (err, stdout, stderr) => {
         if (err) {
           console.error(err);
@@ -168,27 +168,27 @@ export class ZabbixService {
         }
         console.log(
           `${stdout} -
-            zabbix_sender -z 192.168.1.23 -s "ASTERISK" -k ramal.${item} -o "Problema"`,
+            zabbix_sender -z 192.168.1.10 -s "ASTERISK" -k ramal.${item} -o "Problema"`,
         );
         console.log(`${stderr} -
-            zabbix_sender -z 192.168.1.23 -s "ASTERISK" -k ramal.${item} -o "Problema"`);
+            zabbix_sender -z 192.168.1.10 -s "ASTERISK" -k ramal.${item} -o "Problema"`);
       },
     );
   }
 
   async sendAlertSucesso(item: string) {
     exec(
-      `zabbix_sender -z 192.168.1.23 -s "ASTERISK" -k ramal.${item} -o "OK"`,
+      `zabbix_sender -z 192.168.1.10 -s "ASTERISK" -k ramal.${item} -o "OK"`,
       (err, stdout, stderr) => {
         if (err) {
           console.error(err);
           return;
         }
         console.log(
-          `${stdout} zabbix_sender -z 192.168.1.23 -s "ASTERISK" -k ramal.${item} -o "OK"`,
+          `${stdout} zabbix_sender -z 192.168.1.10 -s "ASTERISK" -k ramal.${item} -o "OK"`,
         );
         console.log(
-          `${stderr} zabbix_sender -z 192.168.1.23 -s "ASTERISK" -k ramal.${item} -o "OK"`,
+          `${stderr} zabbix_sender -z 192.168.1.10 -s "ASTERISK" -k ramal.${item} -o "OK"`,
         );
       },
     );
