@@ -137,7 +137,7 @@ export class ZabbixService {
       params: {
         name: `Ramal ${item}`,
         key_: `ramal.${item}`,
-        hostid: '13610',
+        hostid: '16826',
         type: 2,
         value_type: 4,
         interfaceid: '0',
