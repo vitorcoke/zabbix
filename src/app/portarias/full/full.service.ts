@@ -4,7 +4,7 @@ import axios from 'axios';
 @Injectable()
 export class FullService {
   async getFullStatus() {
-    const url = 'http://ipvoicer-int.minhaportaria.com:8088/ipvoicer/ari/endpoints';
+    const url = 'http://ipvoicer-cond.minhaportaria.com:8088/ipvoicer/ari/endpoints';
     const username = 'ctvoicer';
     const password = 'CTV@endpoints';
 
