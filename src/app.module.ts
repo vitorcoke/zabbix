@@ -1,14 +1,16 @@
 import { VerifyRamaisModule } from './schedules/ramais/verify-ramais.module';
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
-import { AsteriskModule } from './app/asterisk/asterisk.module';
+import { SlimModule } from './app/portarias/slim/slim.module';
 import { ZabbixModule } from './app/zabbix/zabbix.module';
+import { FullModule } from './app/portarias/full/full.module';
 
 @Module({
   imports: [
     VerifyRamaisModule,
     ScheduleModule.forRoot(),
-    AsteriskModule,
+    SlimModule,
+    FullModule,
     ZabbixModule,
   ],
   controllers: [],

@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 
 @Injectable()
-export class AsteriskService {
-  async getAsteriskStatus() {
+export class SlimService {
+  async getSlimStatus() {
     const host = 'http://192.168.1.213';
     const port = '8088';
     const username = 'username';
