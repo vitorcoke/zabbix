@@ -28,7 +28,7 @@ export class ZabbixService {
     return response.data;
   }
 
-  async verifyItem(item: string) {
+  async verifyItem(item: string, host:string) {
     const url = `${this.host}/${this.endpoint}`;
     const auth = await this.auth();
     const data = {
@@ -39,6 +39,7 @@ export class ZabbixService {
         search: {
           key_: `ramal.${item}`,
         },
+        hostids:[host]
       },
       auth: auth.result,
       id: 1,
@@ -102,7 +103,7 @@ export class ZabbixService {
     return response.data;
   }
 
-  async createTrigger(item: string) {
+  async createTrigger(item: string, host: string, hostName: string) {
     const url = `${this.host}/${this.endpoint}`;
     const auth = await this.auth();
 
@@ -111,10 +112,15 @@ export class ZabbixService {
       method: 'trigger.create',
       params: {
         description: `Trigger para Ramal ${item}`,
-        expression: `last(/RAMAIS-PORTARIA-FULL/ramal.${item})="Problema"`,
+        expression: `last(/${hostName}/ramal.${item})="Problema"`,
         priority: 5,
         status: 0,
       },
+      hosts: [
+        {
+          hostid: host
+        }
+      ],
       auth: auth.result,
       id: 1,
     };
@@ -128,7 +134,7 @@ export class ZabbixService {
     return response.data;
   }
 
-  async createItem(item: string) {
+  async createItem(item: string, host: string) {
     const url = `${this.host}/${this.endpoint}`;
     const auth = await this.auth();
     const data = {
@@ -137,7 +143,7 @@ export class ZabbixService {
       params: {
         name: `Ramal ${item}`,
         key_: `ramal.${item}`,
-        hostid: '16906',
+        hostid: host,
         type: 2,
         value_type: 4,
         interfaceid: '0',
@@ -158,7 +164,43 @@ export class ZabbixService {
     return response.data;
   }
 
-  async sendAlertError(item: string) {
+  async sendAlertErrorSlim(item: string) {
+    exec(
+      `zabbix_sender -z 192.168.3.11 -s "ASTERISK" -k ramal.${item} -o "Problema"`,
+      (err, stdout, stderr) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        console.log(
+          `${stdout} -
+            zabbix_sender -z 192.168.3.11 -s "ASTERISK" -k ramal.${item} -o "Problema"`,
+        );
+        console.log(`${stderr} -
+            zabbix_sender -z 192.168.3.11 -s "ASTERISK" -k ramal.${item} -o "Problema"`);
+      },
+    );
+  }
+
+  async sendAlertSucessoSlim(item: string) {
+    exec(
+      `zabbix_sender -z 192.168.3.11 -s "ASTERISK" -k ramal.${item} -o "OK"`,
+      (err, stdout, stderr) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        console.log(
+          `${stdout} zabbix_sender -z 192.168.3.11 -s "ASTERISK" -k ramal.${item} -o "OK"`,
+        );
+        console.log(
+          `${stderr} zabbix_sender -z 192.168.3.11 -s "ASTERISK" -k ramal.${item} -o "OK"`,
+        );
+      },
+    );
+  }
+
+  async sendAlertErrorFull(item: string) {
     exec(
       `zabbix_sender -z 192.168.3.11 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "Problema"`,
       (err, stdout, stderr) => {
@@ -176,7 +218,7 @@ export class ZabbixService {
     );
   }
 
-  async sendAlertSucesso(item: string) {
+  async sendAlertSucessoFull(item: string) {
     exec(
       `zabbix_sender -z 192.168.3.11 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "OK"`,
       (err, stdout, stderr) => {
