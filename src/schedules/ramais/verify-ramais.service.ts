@@ -47,6 +47,8 @@ export class VerifyRamaisService {
     }
   }
 
+  @Cron('*/4 * * * *')
+
   async verifyAllRamaisOffFull() {
     const allRamais = await this.FullService.getFullStatus();
 
