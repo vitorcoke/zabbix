@@ -1,4 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { exec } from 'child_process';
 
@@ -6,6 +8,8 @@ import { exec } from 'child_process';
 export class ZabbixService {
   private host = 'http://192.168.3.10';
   private endpoint = 'api_jsonrpc.php';
+
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache){}
 
   async auth() {
     const url = `${this.host}/${this.endpoint}`;
@@ -30,7 +34,8 @@ export class ZabbixService {
 
   async verifyItem(item: string, host:string) {
     const url = `${this.host}/${this.endpoint}`;
-    const auth = await this.auth();
+
+    const value = await this.cacheManager.get('auth');
     const data = {
       jsonrpc: '2.0',
       method: 'item.get',
@@ -41,22 +46,41 @@ export class ZabbixService {
         },
         hostids:[host]
       },
-      auth: auth.result,
+      auth: value,
       id: 1,
     };
 
+    
     const response = await axios.post(url, data, {
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
+
+    if(response.data.error){
+      const auth = await this.auth()
+
+      this.cacheManager.set("auth", auth.result).then(async (e) => {
+
+        const response = await axios.post(url, {...data, auth: e }, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        return response.data
+    
+      })
+    }
+
     return response.data;
   }
 
   async getItem(item: string) {
     const url = `${this.host}/${this.endpoint}`;
-    const auth = await this.auth();
+
+    const value = await this.cacheManager.get('auth');
     const data = {
       jsonrpc: '2.0',
       method: 'item.get',
@@ -66,7 +90,7 @@ export class ZabbixService {
           key_: `ramal.${item}`,
         },
       },
-      auth: auth.result,
+      auth: value,
       id: 1,
     };
 
@@ -76,13 +100,30 @@ export class ZabbixService {
       },
     });
 
+    if(response.data.error){
+      const auth = await this.auth()
+
+      this.cacheManager.set("auth", auth.result).then(async (e) => {
+
+        const response = await axios.post(url, {...data, auth: e }, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        return response.data.result[0].itemid;
+    
+      })
+    }
+
     return response.data.result[0].itemid;
   }
 
   async verifyTriggerToItem(item: string) {
     const url = `${this.host}/${this.endpoint}`;
-    const auth = await this.auth();
 
+
+    const value = await this.cacheManager.get('auth');
     const itemId = await this.getItem(item);
     const data = {
       jsonrpc: '2.0',
@@ -90,7 +131,7 @@ export class ZabbixService {
       params: {
         itemids: itemId,
       },
-      auth: auth.result,
+      auth: value,
       id: 1,
     };
 
@@ -100,13 +141,31 @@ export class ZabbixService {
       },
     });
 
+    if(response.data.error){
+      const auth = await this.auth()
+
+      this.cacheManager.set("auth", auth.result).then(async (e) => {
+
+        const response = await axios.post(url, {...data, auth: e }, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        return response.data;
+    
+      })
+    }
+
+
     return response.data;
   }
 
   async createTrigger(item: string, host: string, hostName: string) {
     const url = `${this.host}/${this.endpoint}`;
-    const auth = await this.auth();
 
+
+    const value = await this.cacheManager.get('auth');
     const data = {
       jsonrpc: '2.0',
       method: 'trigger.create',
@@ -121,7 +180,7 @@ export class ZabbixService {
           hostid: host
         }
       ],
-      auth: auth.result,
+      auth: value,
       id: 1,
     };
 
@@ -131,12 +190,28 @@ export class ZabbixService {
       },
     });
 
+    if(response.data.error){
+      const auth = await this.auth()
+
+      this.cacheManager.set("auth", auth.result).then(async (e) => {
+
+        const response = await axios.post(url, {...data, auth: e }, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        return response.data;
+    
+      })
+    }
+
     return response.data;
   }
 
   async createItem(item: string, host: string) {
     const url = `${this.host}/${this.endpoint}`;
-    const auth = await this.auth();
+    const value = await this.cacheManager.get('auth');
     const data = {
       jsonrpc: '2.0',
       method: 'item.create',
@@ -151,7 +226,7 @@ export class ZabbixService {
         history: '90d',
         trends: 0,
       },
-      auth: auth.result,
+      auth: value,
       id: 1,
     };
 
@@ -161,9 +236,27 @@ export class ZabbixService {
       },
     });
 
+    if(response.data.error){
+      const auth = await this.auth()
+
+      this.cacheManager.set("auth", auth.result).then(async (e) => {
+
+        const response = await axios.post(url, {...data, auth: e }, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        return response.data;
+    
+      })
+    }
+
     return response.data;
   }
 
+
+  
   async sendAlertErrorSlim(item: string) {
     exec(
       `zabbix_sender -z 192.168.3.11 -s "ASTERISK" -k ramal.${item} -o "Problema"`,
