@@ -9,7 +9,7 @@ export class ZabbixService {
   private host = 'http://192.168.3.10';
   private endpoint = 'api_jsonrpc.php';
 
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache){}
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
   async auth() {
     const url = `${this.host}/${this.endpoint}`;
@@ -32,7 +32,7 @@ export class ZabbixService {
     return response.data;
   }
 
-  async verifyItem(item: string, host:string) {
+  async verifyItem(item: string, host: string) {
     const url = `${this.host}/${this.endpoint}`;
 
     const value = await this.cacheManager.get('auth');
@@ -44,34 +44,34 @@ export class ZabbixService {
         search: {
           key_: `ramal.${item}`,
         },
-        hostids:[host]
+        hostids: [host],
       },
       auth: value,
       id: 1,
     };
 
-    
     const response = await axios.post(url, data, {
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
+    if (response.data.error) {
+      const auth = await this.auth();
 
-    if(response.data.error){
-      const auth = await this.auth()
-
-      this.cacheManager.set("auth", auth.result).then(async (e) => {
-
-        const response = await axios.post(url, {...data, auth: e }, {
-          headers: {
-            'Content-Type': 'application/json',
+      this.cacheManager.set('auth', auth.result).then(async (e) => {
+        const response = await axios.post(
+          url,
+          { ...data, auth: e },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
           },
-        });
+        );
 
-        return response.data
-    
-      })
+        return response.data;
+      });
     }
 
     return response.data;
@@ -100,20 +100,22 @@ export class ZabbixService {
       },
     });
 
-    if(response.data.error){
-      const auth = await this.auth()
+    if (response.data.error) {
+      const auth = await this.auth();
 
-      this.cacheManager.set("auth", auth.result).then(async (e) => {
-
-        const response = await axios.post(url, {...data, auth: e }, {
-          headers: {
-            'Content-Type': 'application/json',
+      this.cacheManager.set('auth', auth.result).then(async (e) => {
+        const response = await axios.post(
+          url,
+          { ...data, auth: e },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
           },
-        });
+        );
 
         return response.data.result[0].itemid;
-    
-      })
+      });
     }
 
     return response.data.result[0].itemid;
@@ -121,7 +123,6 @@ export class ZabbixService {
 
   async verifyTriggerToItem(item: string) {
     const url = `${this.host}/${this.endpoint}`;
-
 
     const value = await this.cacheManager.get('auth');
     const itemId = await this.getItem(item);
@@ -141,29 +142,29 @@ export class ZabbixService {
       },
     });
 
-    if(response.data.error){
-      const auth = await this.auth()
+    if (response.data.error) {
+      const auth = await this.auth();
 
-      this.cacheManager.set("auth", auth.result).then(async (e) => {
-
-        const response = await axios.post(url, {...data, auth: e }, {
-          headers: {
-            'Content-Type': 'application/json',
+      this.cacheManager.set('auth', auth.result).then(async (e) => {
+        const response = await axios.post(
+          url,
+          { ...data, auth: e },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
           },
-        });
+        );
 
         return response.data;
-    
-      })
+      });
     }
-
 
     return response.data;
   }
 
   async createTrigger(item: string, host: string, hostName: string) {
     const url = `${this.host}/${this.endpoint}`;
-
 
     const value = await this.cacheManager.get('auth');
     const data = {
@@ -175,11 +176,6 @@ export class ZabbixService {
         priority: 5,
         status: 0,
       },
-      hosts: [
-        {
-          hostid: host
-        }
-      ],
       auth: value,
       id: 1,
     };
@@ -190,20 +186,22 @@ export class ZabbixService {
       },
     });
 
-    if(response.data.error){
-      const auth = await this.auth()
+    if (response.data.error) {
+      const auth = await this.auth();
 
-      this.cacheManager.set("auth", auth.result).then(async (e) => {
-
-        const response = await axios.post(url, {...data, auth: e }, {
-          headers: {
-            'Content-Type': 'application/json',
+      this.cacheManager.set('auth', auth.result).then(async (e) => {
+        const response = await axios.post(
+          url,
+          { ...data, auth: e },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
           },
-        });
+        );
 
         return response.data;
-    
-      })
+      });
     }
 
     return response.data;
@@ -236,27 +234,27 @@ export class ZabbixService {
       },
     });
 
-    if(response.data.error){
-      const auth = await this.auth()
+    if (response.data.error) {
+      const auth = await this.auth();
 
-      this.cacheManager.set("auth", auth.result).then(async (e) => {
-
-        const response = await axios.post(url, {...data, auth: e }, {
-          headers: {
-            'Content-Type': 'application/json',
+      this.cacheManager.set('auth', auth.result).then(async (e) => {
+        const response = await axios.post(
+          url,
+          { ...data, auth: e },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
           },
-        });
+        );
 
         return response.data;
-    
-      })
+      });
     }
 
     return response.data;
   }
 
-
-  
   async sendAlertErrorSlim(item: string) {
     exec(
       `zabbix_sender -z 192.168.3.11 -s "ASTERISK" -k ramal.${item} -o "Problema"`,
