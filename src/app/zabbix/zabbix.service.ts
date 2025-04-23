@@ -257,7 +257,7 @@ export class ZabbixService {
 
   async sendAlertErrorSlim(item: string) {
     exec(
-      `zabbix_sender -z 192.168.3.11 -s "ASTERISK" -k ramal.${item} -o "Problema"`,
+      `zabbix_sender -z 192.168.1.22 -s "ASTERISK" -k ramal.${item} -o "Problema"`,
       (err, stdout, stderr) => {
         if (err) {
           console.error(err);
@@ -265,27 +265,27 @@ export class ZabbixService {
         }
         console.log(
           `${stdout} -
-            zabbix_sender -z 192.168.3.11 -s "ASTERISK" -k ramal.${item} -o "Problema"`,
+            zabbix_sender -z 192.168.1.22 -s "ASTERISK" -k ramal.${item} -o "Problema"`,
         );
         console.log(`${stderr} -
-            zabbix_sender -z 192.168.3.11 -s "ASTERISK" -k ramal.${item} -o "Problema"`);
+            zabbix_sender -z 192.168.1.22 -s "ASTERISK" -k ramal.${item} -o "Problema"`);
       },
     );
   }
 
   async sendAlertSucessoSlim(item: string) {
     exec(
-      `zabbix_sender -z 192.168.3.11 -s "ASTERISK" -k ramal.${item} -o "OK"`,
+      `zabbix_sender -z 192.168.1.22 -s "ASTERISK" -k ramal.${item} -o "OK"`,
       (err, stdout, stderr) => {
         if (err) {
           console.error(err);
           return;
         }
         console.log(
-          `${stdout} zabbix_sender -z 192.168.3.11 -s "ASTERISK" -k ramal.${item} -o "OK"`,
+          `${stdout} zabbix_sender -z 192.168.1.22 -s "ASTERISK" -k ramal.${item} -o "OK"`,
         );
         console.log(
-          `${stderr} zabbix_sender -z 192.168.3.11 -s "ASTERISK" -k ramal.${item} -o "OK"`,
+          `${stderr} zabbix_sender -z 192.168.1.22 -s "ASTERISK" -k ramal.${item} -o "OK"`,
         );
       },
     );
@@ -293,7 +293,7 @@ export class ZabbixService {
 
   async sendAlertErrorFull(item: string) {
     exec(
-      `zabbix_sender -z 192.168.3.11 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "Problema"`,
+      `zabbix_sender -z 192.168.1.22 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "Problema"`,
       (err, stdout, stderr) => {
         if (err) {
           console.error(err);
@@ -301,27 +301,27 @@ export class ZabbixService {
         }
         console.log(
           `${stdout} -
-            zabbix_sender -z 192.168.3.11 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "Problema"`,
+            zabbix_sender -z 192.168.1.22 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "Problema"`,
         );
         console.log(`${stderr} -
-            zabbix_sender -z 192.168.3.11 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "Problema"`);
+            zabbix_sender -z 192.168.1.22 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "Problema"`);
       },
     );
   }
 
   async sendAlertSucessoFull(item: string) {
     exec(
-      `zabbix_sender -z 192.168.3.11 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "OK"`,
+      `zabbix_sender -z 192.168.1.22 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "OK"`,
       (err, stdout, stderr) => {
         if (err) {
           console.error(err);
           return;
         }
         console.log(
-          `${stdout} zabbix_sender -z 192.168.3.11 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "OK"`,
+          `${stdout} zabbix_sender -z 192.168.1.22 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "OK"`,
         );
         console.log(
-          `${stderr} zabbix_sender -z 192.168.3.11 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "OK"`,
+          `${stderr} zabbix_sender -z 192.168.1.22 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "OK"`,
         );
       },
     );
