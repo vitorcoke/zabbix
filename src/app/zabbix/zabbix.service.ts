@@ -6,7 +6,7 @@ import { exec } from 'child_process';
 
 @Injectable()
 export class ZabbixService {
-  private host = 'http://192.168.3.10';
+  private host = 'http://192.168.1.23';
   private endpoint = 'api_jsonrpc.php';
 
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
