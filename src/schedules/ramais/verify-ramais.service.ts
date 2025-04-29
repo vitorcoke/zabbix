@@ -14,14 +14,14 @@ export class VerifyRamaisService {
 
   private serverFront = [
     {
-      server: '192.168.1.23',
-      serverBack: '192.168.1.22',
+      server: 'http://192.168.1.23',
+      serverBack: 'http://192.168.1.22',
       hostZabbixSlim: '19426',
       hostZabbixFull: '19854',
     },
     {
-      server: '192.168.1.10',
-      serverBack: '192.168.1.11',
+      server: 'http://192.168.1.10',
+      serverBack: 'http://192.168.1.11',
       hostZabbixSlim: '16192',
       hostZabbixFull: '19086',
     },
@@ -49,12 +49,12 @@ export class VerifyRamaisService {
             if (status.state === 'online') {
               await this.zabbixService.sendAlertSucessoSlim(
                 status.resource,
-                server.server,
+                server.serverBack,
               );
             } else {
               await this.zabbixService.sendAlertErrorSlim(
                 status.resource,
-                server.server,
+                server.serverBack,
               );
             }
           } else {
