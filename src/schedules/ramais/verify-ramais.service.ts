@@ -8,8 +8,8 @@ import { ZabbixService } from '../../app/zabbix/zabbix.service';
 export class VerifyRamaisService {
   constructor(
     private readonly zabbixService: ZabbixService,
-    private readonly SlimService: SlimService,
-    private readonly FullService: FullService,
+    private readonly slimService: SlimService,
+    private readonly fullService: FullService,
   ) {}
 
   private serverFront = [
@@ -27,136 +27,167 @@ export class VerifyRamaisService {
     },
   ];
 
-  @Cron('* * * * *')
+  @Cron('*/3 * * * *')
   async verifyAllRamaisOffSlim() {
-    const allRamais = await this.SlimService.getSlimStatus();
+    const allRamais = await this.slimService.getSlimStatus();
 
-    for (const server of this.serverFront) {
-      for (const status of allRamais) {
-        const existItem = await this.zabbixService.verifyItem(
-          status.resource,
-          server.hostZabbixSlim,
-          server.server,
-        );
-
-        if (existItem.result.length > 0) {
-          const validTrigger = await this.zabbixService.verifyTriggerToItem(
-            status.resource,
-            server.server,
-          );
-
-          if (validTrigger.result.length > 0) {
-            if (status.state === 'online') {
-              await this.zabbixService.sendAlertSucessoSlim(
+    await Promise.all(
+      this.serverFront.map(async (server) => {
+        await Promise.all(
+          allRamais.map(async (status) => {
+            try {
+              const existItem = await this.zabbixService.verifyItem(
                 status.resource,
-                server.serverBack,
-              );
-            } else {
-              await this.zabbixService.sendAlertErrorSlim(
-                status.resource,
-                server.serverBack,
-              );
-            }
-          } else {
-            if (status.state !== 'online') {
-              await this.zabbixService.createTrigger(
-                status.resource,
+                server.hostZabbixSlim,
                 server.server,
-                'ASTERISK',
               );
 
-              await this.zabbixService.createTrigger(
-                status.resource,
-                server.serverBack,
-                'ASTERISK',
+              if (existItem.result.length > 0) {
+                const validTrigger =
+                  await this.zabbixService.verifyTriggerToItem(
+                    status.resource,
+                    server.server,
+                  );
+
+                if (validTrigger.result.length > 0) {
+                  if (status.state === 'online') {
+                    await this.zabbixService.sendAlertSucessoSlim(
+                      status.resource,
+                      server.serverBack,
+                    );
+                  } else {
+                    await this.zabbixService.sendAlertErrorSlim(
+                      status.resource,
+                      server.serverBack,
+                    );
+                  }
+                } else if (status.state !== 'online') {
+                  await Promise.all([
+                    this.zabbixService.createTrigger(
+                      status.resource,
+                      server.server,
+                      'ASTERISK',
+                    ),
+                    this.zabbixService.createTrigger(
+                      status.resource,
+                      server.serverBack,
+                      'ASTERISK',
+                    ),
+                  ]);
+                }
+              } else {
+                await Promise.all([
+                  this.zabbixService.createItem(
+                    status.resource,
+                    server.hostZabbixSlim,
+                    server.server,
+                  ),
+                  this.zabbixService.createTrigger(
+                    status.resource,
+                    server.server,
+                    'ASTERISK',
+                  ),
+                  ...(status.state !== 'online'
+                    ? [
+                        this.zabbixService.createTrigger(
+                          status.resource,
+                          server.serverBack,
+                          'ASTERISK',
+                        ),
+                      ]
+                    : []),
+                ]);
+              }
+            } catch (err) {
+              console.error(
+                `Erro ao processar ramal ${status.resource} (SLIM) no servidor ${server.server}:`,
+                err,
               );
             }
-          }
-        } else {
-          await this.zabbixService.createItem(
-            status.resource,
-            server.hostZabbixSlim,
-            server.server,
-          );
-          await this.zabbixService.createTrigger(
-            status.resource,
-            server.server,
-            'ASTERISK',
-          );
-          if (status.state !== 'online') {
-            await this.zabbixService.createTrigger(
-              status.resource,
-              server.serverBack,
-              'ASTERISK',
-            );
-          }
-        }
-      }
-    }
+          }),
+        );
+      }),
+    );
   }
 
   @Cron('*/4 * * * *')
   async verifyAllRamaisOffFull() {
-    const allRamais = await this.FullService.getFullStatus();
+    const allRamais = await this.fullService.getFullStatus();
 
-    for (const server of this.serverFront) {
-      for (const status of allRamais) {
-        const existItem = await this.zabbixService.verifyItem(
-          status.resource,
-          server.hostZabbixFull,
-          server.server,
-        );
-
-        if (existItem.result.length > 0) {
-          const validTrigger = await this.zabbixService.verifyTriggerToItem(
-            status.resource,
-            server.server,
-          );
-
-          if (validTrigger.result.length > 0) {
-            if (status.state === 'online') {
-              await this.zabbixService.sendAlertSucessoFull(
+    await Promise.all(
+      this.serverFront.map(async (server) => {
+        await Promise.all(
+          allRamais.map(async (status) => {
+            try {
+              const existItem = await this.zabbixService.verifyItem(
                 status.resource,
-                server.serverBack,
-              );
-            } else {
-              await this.zabbixService.sendAlertErrorFull(
-                status.resource,
-                server.serverBack,
-              );
-            }
-          } else {
-            if (status.state !== 'online') {
-              await this.zabbixService.createTrigger(
-                status.resource,
+                server.hostZabbixFull,
                 server.server,
-                'RAMAIS-PORTARIA-FULL',
               );
-              await this.zabbixService.sendAlertErrorFull(
-                status.resource,
-                server.serverBack,
+
+              if (existItem.result.length > 0) {
+                const validTrigger =
+                  await this.zabbixService.verifyTriggerToItem(
+                    status.resource,
+                    server.server,
+                  );
+
+                if (validTrigger.result.length > 0) {
+                  if (status.state === 'online') {
+                    await this.zabbixService.sendAlertSucessoFull(
+                      status.resource,
+                      server.serverBack,
+                    );
+                  } else {
+                    await this.zabbixService.sendAlertErrorFull(
+                      status.resource,
+                      server.serverBack,
+                    );
+                  }
+                } else if (status.state !== 'online') {
+                  await Promise.all([
+                    this.zabbixService.createTrigger(
+                      status.resource,
+                      server.server,
+                      'RAMAIS-PORTARIA-FULL',
+                    ),
+                    this.zabbixService.sendAlertErrorFull(
+                      status.resource,
+                      server.serverBack,
+                    ),
+                  ]);
+                }
+              } else {
+                await Promise.all([
+                  this.zabbixService.createItem(
+                    status.resource,
+                    server.hostZabbixFull,
+                    server.server,
+                  ),
+                  this.zabbixService.createTrigger(
+                    status.resource,
+                    server.server,
+                    'RAMAIS-PORTARIA-FULL',
+                  ),
+                  ...(status.state !== 'online'
+                    ? [
+                        this.zabbixService.sendAlertErrorFull(
+                          status.resource,
+                          server.serverBack,
+                        ),
+                      ]
+                    : []),
+                ]);
+              }
+            } catch (err) {
+              console.error(
+                `Erro ao processar ramal ${status.resource} (FULL) no servidor ${server.server}:`,
+                err,
               );
             }
-          }
-        } else {
-          await this.zabbixService.createItem(
-            status.resource,
-            server.hostZabbixFull,
-            server.server,
-          );
-          await this.zabbixService.createTrigger(
-            status.resource,
-            server.server,
-            'RAMAIS-PORTARIA-FULL',
-          );
-          if (status.state !== 'online') {
-            await this.zabbixService.sendAlertErrorFull(
-              status.resource,
-              server.serverBack,
-            );
-          }
-        }
-      }
-    }
+          }),
+        );
+      }),
+    );
   }
 }
