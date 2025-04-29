@@ -11,7 +11,7 @@ export class ZabbixService {
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
   async auth(server: string) {
-    const url = `${server}/${this.endpoint}`;
+    const url = `http://${server}/${this.endpoint}`;
     const data = {
       jsonrpc: '2.0',
       method: 'user.login',
@@ -32,7 +32,7 @@ export class ZabbixService {
   }
 
   async verifyItem(item: string, hostZabbix: string, server: string) {
-    const url = `${server}/${this.endpoint}`;
+    const url = `http://${server}/${this.endpoint}`;
 
     const value = await this.cacheManager.get(server);
 
@@ -78,7 +78,7 @@ export class ZabbixService {
   }
 
   async getItem(item: string, server: string) {
-    const url = `${server}/${this.endpoint}`;
+    const url = `http://${server}/${this.endpoint}`;
 
     const value = await this.cacheManager.get(server);
     const data = {
@@ -122,7 +122,7 @@ export class ZabbixService {
   }
 
   async verifyTriggerToItem(item: string, server: string) {
-    const url = `${server}/${this.endpoint}`;
+    const url = `http://${server}/${this.endpoint}`;
 
     const value = await this.cacheManager.get(server);
     const itemId = await this.getItem(item, server);
@@ -164,7 +164,7 @@ export class ZabbixService {
   }
 
   async createTrigger(item: string, server: string, hostName: string) {
-    const url = `${server}/${this.endpoint}`;
+    const url = `http://${server}/${this.endpoint}`;
 
     const value = await this.cacheManager.get(server);
     const data = {
@@ -208,7 +208,7 @@ export class ZabbixService {
   }
 
   async createItem(item: string, hostZabbix: string, server: string) {
-    const url = `${server}/${this.endpoint}`;
+    const url = `http://${server}/${this.endpoint}`;
     const value = await this.cacheManager.get(server);
     const data = {
       jsonrpc: '2.0',

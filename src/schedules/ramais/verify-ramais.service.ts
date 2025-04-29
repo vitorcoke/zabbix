@@ -14,14 +14,14 @@ export class VerifyRamaisService {
 
   private serverFront = [
     {
-      server: 'http://192.168.1.23',
-      serverBack: 'http://192.168.1.22',
+      server: '192.168.1.23',
+      serverBack: '192.168.1.22',
       hostZabbixSlim: '19426',
       hostZabbixFull: '19854',
     },
     {
-      server: 'http://192.168.1.10',
-      serverBack: 'http://192.168.1.11',
+      server: '192.168.1.10',
+      serverBack: '192.168.1.11',
       hostZabbixSlim: '16192',
       hostZabbixFull: '19086',
     },
