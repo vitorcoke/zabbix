@@ -6,13 +6,12 @@ import { exec } from 'child_process';
 
 @Injectable()
 export class ZabbixService {
-  private host = 'http://192.168.1.23';
   private endpoint = 'api_jsonrpc.php';
 
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
-  async auth() {
-    const url = `${this.host}/${this.endpoint}`;
+  async auth(server: string) {
+    const url = `${server}/${this.endpoint}`;
     const data = {
       jsonrpc: '2.0',
       method: 'user.login',
@@ -32,10 +31,11 @@ export class ZabbixService {
     return response.data;
   }
 
-  async verifyItem(item: string, host: string) {
-    const url = `${this.host}/${this.endpoint}`;
+  async verifyItem(item: string, hostZabbix: string, server: string) {
+    const url = `${server}/${this.endpoint}`;
 
-    const value = await this.cacheManager.get('auth');
+    const value = await this.cacheManager.get(server);
+
     const data = {
       jsonrpc: '2.0',
       method: 'item.get',
@@ -44,7 +44,7 @@ export class ZabbixService {
         search: {
           key_: `ramal.${item}`,
         },
-        hostids: [host],
+        hostids: [hostZabbix],
       },
       auth: value,
       id: 1,
@@ -57,9 +57,9 @@ export class ZabbixService {
     });
 
     if (response.data.error) {
-      const auth = await this.auth();
+      const auth = await this.auth(server);
 
-      this.cacheManager.set('auth', auth.result).then(async (e) => {
+      this.cacheManager.set(server, auth.result).then(async (e) => {
         const response = await axios.post(
           url,
           { ...data, auth: e },
@@ -77,10 +77,10 @@ export class ZabbixService {
     return response.data;
   }
 
-  async getItem(item: string) {
-    const url = `${this.host}/${this.endpoint}`;
+  async getItem(item: string, server: string) {
+    const url = `${server}/${this.endpoint}`;
 
-    const value = await this.cacheManager.get('auth');
+    const value = await this.cacheManager.get(server);
     const data = {
       jsonrpc: '2.0',
       method: 'item.get',
@@ -101,9 +101,9 @@ export class ZabbixService {
     });
 
     if (response.data.error) {
-      const auth = await this.auth();
+      const auth = await this.auth(server);
 
-      this.cacheManager.set('auth', auth.result).then(async (e) => {
+      this.cacheManager.set(server, auth.result).then(async (e) => {
         const response = await axios.post(
           url,
           { ...data, auth: e },
@@ -121,11 +121,11 @@ export class ZabbixService {
     return response.data.result[0].itemid;
   }
 
-  async verifyTriggerToItem(item: string) {
-    const url = `${this.host}/${this.endpoint}`;
+  async verifyTriggerToItem(item: string, server: string) {
+    const url = `${server}/${this.endpoint}`;
 
-    const value = await this.cacheManager.get('auth');
-    const itemId = await this.getItem(item);
+    const value = await this.cacheManager.get(server);
+    const itemId = await this.getItem(item, server);
     const data = {
       jsonrpc: '2.0',
       method: 'trigger.get',
@@ -143,9 +143,9 @@ export class ZabbixService {
     });
 
     if (response.data.error) {
-      const auth = await this.auth();
+      const auth = await this.auth(server);
 
-      this.cacheManager.set('auth', auth.result).then(async (e) => {
+      this.cacheManager.set(server, auth.result).then(async (e) => {
         const response = await axios.post(
           url,
           { ...data, auth: e },
@@ -163,10 +163,10 @@ export class ZabbixService {
     return response.data;
   }
 
-  async createTrigger(item: string, host: string, hostName: string) {
-    const url = `${this.host}/${this.endpoint}`;
+  async createTrigger(item: string, server: string, hostName: string) {
+    const url = `${server}/${this.endpoint}`;
 
-    const value = await this.cacheManager.get('auth');
+    const value = await this.cacheManager.get(server);
     const data = {
       jsonrpc: '2.0',
       method: 'trigger.create',
@@ -187,9 +187,9 @@ export class ZabbixService {
     });
 
     if (response.data.error) {
-      const auth = await this.auth();
+      const auth = await this.auth(server);
 
-      this.cacheManager.set('auth', auth.result).then(async (e) => {
+      this.cacheManager.set(server, auth.result).then(async (e) => {
         const response = await axios.post(
           url,
           { ...data, auth: e },
@@ -207,16 +207,16 @@ export class ZabbixService {
     return response.data;
   }
 
-  async createItem(item: string, host: string) {
-    const url = `${this.host}/${this.endpoint}`;
-    const value = await this.cacheManager.get('auth');
+  async createItem(item: string, hostZabbix: string, server: string) {
+    const url = `${server}/${this.endpoint}`;
+    const value = await this.cacheManager.get(server);
     const data = {
       jsonrpc: '2.0',
       method: 'item.create',
       params: {
         name: `Ramal ${item}`,
         key_: `ramal.${item}`,
-        hostid: host,
+        hostid: hostZabbix,
         type: 2,
         value_type: 4,
         interfaceid: '0',
@@ -235,9 +235,9 @@ export class ZabbixService {
     });
 
     if (response.data.error) {
-      const auth = await this.auth();
+      const auth = await this.auth(server);
 
-      this.cacheManager.set('auth', auth.result).then(async (e) => {
+      this.cacheManager.set(server, auth.result).then(async (e) => {
         const response = await axios.post(
           url,
           { ...data, auth: e },
@@ -255,9 +255,9 @@ export class ZabbixService {
     return response.data;
   }
 
-  async sendAlertErrorSlim(item: string) {
+  async sendAlertErrorSlim(item: string, server: string) {
     exec(
-      `zabbix_sender -z 192.168.1.22 -s "ASTERISK" -k ramal.${item} -o "Problema"`,
+      `zabbix_sender -z ${server} -s "ASTERISK" -k ramal.${item} -o "Problema"`,
       (err, stdout, stderr) => {
         if (err) {
           console.error(err);
@@ -265,35 +265,35 @@ export class ZabbixService {
         }
         console.log(
           `${stdout} -
-            zabbix_sender -z 192.168.1.22 -s "ASTERISK" -k ramal.${item} -o "Problema"`,
+            zabbix_sender -z ${server} -s "ASTERISK" -k ramal.${item} -o "Problema"`,
         );
         console.log(`${stderr} -
-            zabbix_sender -z 192.168.1.22 -s "ASTERISK" -k ramal.${item} -o "Problema"`);
+            zabbix_sender -z ${server} -s "ASTERISK" -k ramal.${item} -o "Problema"`);
       },
     );
   }
 
-  async sendAlertSucessoSlim(item: string) {
+  async sendAlertSucessoSlim(item: string, server: string) {
     exec(
-      `zabbix_sender -z 192.168.1.22 -s "ASTERISK" -k ramal.${item} -o "OK"`,
+      `zabbix_sender -z ${server} -s "ASTERISK" -k ramal.${item} -o "OK"`,
       (err, stdout, stderr) => {
         if (err) {
           console.error(err);
           return;
         }
         console.log(
-          `${stdout} zabbix_sender -z 192.168.1.22 -s "ASTERISK" -k ramal.${item} -o "OK"`,
+          `${stdout} zabbix_sender -z ${server} -s "ASTERISK" -k ramal.${item} -o "OK"`,
         );
         console.log(
-          `${stderr} zabbix_sender -z 192.168.1.22 -s "ASTERISK" -k ramal.${item} -o "OK"`,
+          `${stderr} zabbix_sender -z ${server} -s "ASTERISK" -k ramal.${item} -o "OK"`,
         );
       },
     );
   }
 
-  async sendAlertErrorFull(item: string) {
+  async sendAlertErrorFull(item: string, server: string) {
     exec(
-      `zabbix_sender -z 192.168.1.22 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "Problema"`,
+      `zabbix_sender -z ${server} -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "Problema"`,
       (err, stdout, stderr) => {
         if (err) {
           console.error(err);
@@ -301,27 +301,27 @@ export class ZabbixService {
         }
         console.log(
           `${stdout} -
-            zabbix_sender -z 192.168.1.22 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "Problema"`,
+            zabbix_sender -z ${server} -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "Problema"`,
         );
         console.log(`${stderr} -
-            zabbix_sender -z 192.168.1.22 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "Problema"`);
+            zabbix_sender -z ${server} -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "Problema"`);
       },
     );
   }
 
-  async sendAlertSucessoFull(item: string) {
+  async sendAlertSucessoFull(item: string, server: string) {
     exec(
-      `zabbix_sender -z 192.168.1.22 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "OK"`,
+      `zabbix_sender -z ${server} -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "OK"`,
       (err, stdout, stderr) => {
         if (err) {
           console.error(err);
           return;
         }
         console.log(
-          `${stdout} zabbix_sender -z 192.168.1.22 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "OK"`,
+          `${stdout} zabbix_sender -z ${server} -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "OK"`,
         );
         console.log(
-          `${stderr} zabbix_sender -z 192.168.1.22 -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "OK"`,
+          `${stderr} zabbix_sender -z ${server} -s "RAMAIS-PORTARIA-FULL" -k ramal.${item} -o "OK"`,
         );
       },
     );
