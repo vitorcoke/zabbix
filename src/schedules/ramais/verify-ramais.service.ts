@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { SlimService } from '../../app/portarias/slim/slim.service';
 import { ZabbixService } from '../../app/zabbix/zabbix.service';
-import pLimit from 'p-limit';
+import * as pLimit from 'p-limit';
 
 @Injectable()
 export class VerifyRamaisService {
